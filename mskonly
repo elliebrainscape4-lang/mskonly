@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Anatomy Quest</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0c0c14;
+  --surface: #14141e;
+  --surface2: #1c1c2a;
+  --border: rgba(255,255,255,0.08);
+  --border2: rgba(255,255,255,0.18);
+  --text: #eeecf0;
+  --muted: #7a7890;
+  --accent: #b8f050;
+  --accent2: #7b6ef6;
+  --correct: #50f0a0;
+  --wrong: #f05050;
+  --gold: #f0c840;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+body::before {
+  content: '';
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background:
+    radial-gradient(ellipse at 15% 15%, rgba(123,110,246,0.08) 0%, transparent 55%),
+    radial-gradient(ellipse at 85% 85%, rgba(184,240,80,0.06) 0%, transparent 55%);
+  pointer-events: none; z-index: 0;
+}
+.wrap {
+  position: relative; z-index: 1;
+  max-width: 820px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem 4rem;
+}
+.hdr {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2.5rem;
+}
+.logo {
+  font-family: 'Syne', sans-serif;
+  font-size: 1.25rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--accent);
+}
+.logo em { color: var(--text); font-style: normal; }
+.hdr-stats { display: flex; gap: 0.75rem; }
+.pill {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.75rem;
+  padding: 0.3rem 0.75rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  color: var(--muted);
+  display: flex; gap: 0.35rem; align-items: center;
+}
+.pill b { color: var(--text); font-weight: 500; }
+.screen { display: none; }
+.screen.on { display: block; animation: up 0.35s ease; }
+@keyframes up { from { opacity:0; transform:translateY(14px); } to { opacity:1; transform:translateY(0); } }
+.hero-title {
+  font-family: 'Syne', sans-serif;
+  font-size: clamp(2rem, 6vw, 3.6rem);
+  font-weight: 800;
+  line-height: 1.06;
+  letter-spacing: -0.03em;
+  margin-bottom: 0.7rem;
+}
+.hero-title .hi { color: var(--accent); }
+.hero-sub {
+  font-size: 1rem;
+  color: var(--muted);
+  line-height: 1.65;
+  margin-bottom: 2.5rem;
+  max-width: 480px;
+}
+.section-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+  margin-bottom: 0.75rem;
+}
+.chips { display: flex; flex-wrap: wrap; gap: 0.45rem; margin-bottom: 2rem; }
+.chip {
+  padding: 0.4rem 0.9rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.18s;
+  color: var(--muted);
+}
+.chip:hover { border-color: var(--border2); color: var(--text); }
+.chip.on { background: var(--accent); border-color: var(--accent); color: #0c0c14; font-weight: 500; }
+.mode-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 2rem;
+}
+.mode-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 1.25rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+  overflow: hidden;
+}
+.mode-card::after {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0;
+  height: 2px;
+  background: var(--card-col, var(--accent2));
+}
+.mode-card:hover { transform: translateY(-2px); border-color: var(--border2); }
+.mode-card.on { border-color: var(--card-col, var(--accent2)); background: var(--surface2); }
+.mode-icon { font-size: 1.6rem; margin-bottom: 0.6rem; }
+.mode-name {
+  font-family: 'Syne', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  margin-bottom: 0.25rem;
+}
+.mode-desc { font-size: 0.78rem; color: var(--muted); line-height: 1.5; }
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-family: 'Syne', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  padding: 0.85rem 2rem;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.18s;
+}
+.btn-primary { background: var(--accent); color: #0c0c14; }
+.btn-primary:hover { filter: brightness(1.08); transform: translateY(-1px); }
+.btn-primary:disabled { opacity: 0.4; cursor: default; transform: none; }
+.btn-ghost {
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+.btn-ghost:hover { border-color: var(--border2); background: var(--surface2); }
+.progress-bar-wrap {
+  background: var(--surface);
+  border-radius: 999px;
+  height: 5px;
+  margin-bottom: 1.75rem;
+  overflow: hidden;
+}
+.progress-bar-fill {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 999px;
+  transition: width 0.4s ease;
+}
+.quiz-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.25rem;
+}
+.quiz-topic {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.72rem;
+  color: var(--accent2);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  background: rgba(123,110,246,0.12);
+  padding: 0.3rem 0.75rem;
+  border-radius: 999px;
+  border: 1px solid rgba(123,110,246,0.2);
+}
+.quiz-count {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+.q-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 2rem;
+  margin-bottom: 1.25rem;
+}
+.q-type-badge {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  margin-bottom: 1rem;
+}
+.q-text { font-size: 1.15rem; line-height: 1.6; font-weight: 500; }
+.q-text strong { color: var(--accent); }
+.answers {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.65rem;
+  margin-bottom: 1.25rem;
+}
+@media (max-width: 540px) { .answers { grid-template-columns: 1fr; } }
+.ans-btn {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 0.9rem 1.1rem;
+  text-align: left;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.88rem;
+  color: var(--text);
+  cursor: pointer;
+  transition: all 0.18s;
+  line-height: 1.45;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+}
+.ans-btn:hover:not(:disabled) { border-color: var(--border2); background: var(--surface2); transform: translateY(-1px); }
+.ans-btn:disabled { cursor: default; }
+.ans-btn.correct { border-color: var(--correct); background: rgba(80,240,160,0.08); color: var(--correct); }
+.ans-btn.wrong { border-color: var(--wrong); background: rgba(240,80,80,0.08); color: var(--wrong); }
+.ans-key {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.72rem;
+  background: rgba(255,255,255,0.06);
+  border-radius: 5px;
+  padding: 0.15rem 0.4rem;
+  flex-shrink: 0;
+  margin-top: 1px;
+  color: var(--muted);
+}
+.ans-btn.correct .ans-key { background: rgba(80,240,160,0.2); color: var(--correct); }
+.ans-btn.wrong .ans-key { background: rgba(240,80,80,0.2); color: var(--wrong); }
+.feedback-box {
+  border-radius: 12px;
+  padding: 1.1rem 1.3rem;
+  margin-bottom: 1.25rem;
+  display: none;
+  animation: up 0.25s ease;
+}
+.feedback-box.show { display: block; }
+.feedback-box.ok { background: rgba(80,240,160,0.08); border: 1px solid rgba(80,240,160,0.25); }
+.feedback-box.bad { background: rgba(240,80,80,0.08); border: 1px solid rgba(240,80,80,0.25); }
+.feedback-head {
+  font-family: 'Syne', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  margin-bottom: 0.4rem;
+}
+.feedback-box.ok .feedback-head { color: var(--correct); }
+.feedback-box.bad .feedback-head { color: var(--wrong); }
+.feedback-body { font-size: 0.83rem; color: var(--muted); line-height: 1.6; }
+.quiz-actions { display: flex; justify-content: flex-end; gap: 0.75rem; }
+.streak-flash {
+  position: fixed;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%) scale(0.5);
+  font-family: 'Syne', sans-serif;
+  font-size: 3rem;
+  font-weight: 800;
+  color: var(--gold);
+  pointer-events: none;
+  z-index: 100;
+  opacity: 0;
+}
+.streak-flash.pop { animation: pop 1.2s ease forwards; }
+@keyframes pop {
+  0%   { opacity:0; transform: translate(-50%,-50%) scale(0.4); }
+  20%  { opacity:1; transform: translate(-50%,-55%) scale(1.15); }
+  60%  { opacity:1; transform: translate(-50%,-58%) scale(1); }
+  100% { opacity:0; transform: translate(-50%,-70%) scale(0.9); }
+}
+.results-hero { text-align: center; padding: 3rem 0 2rem; }
+.results-score {
+  font-family: 'Syne', sans-serif;
+  font-size: clamp(4rem, 12vw, 7rem);
+  font-weight: 800;
+  line-height: 1;
+  margin-bottom: 0.5rem;
+  letter-spacing: -0.04em;
+}
+.results-label { font-size: 1rem; color: var(--muted); margin-bottom: 2.5rem; }
+.results-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.75rem;
+  margin-bottom: 2.5rem;
+}
+@media (max-width: 500px) { .results-grid { grid-template-columns: 1fr 1fr; } }
+.stat-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1rem;
+  text-align: center;
+}
+.stat-card .sv {
+  font-family: 'Syne', sans-serif;
+  font-size: 1.8rem;
+  font-weight: 800;
+  margin-bottom: 0.2rem;
+}
+.stat-card .sl { font-size: 0.75rem; color: var(--muted); }
+.results-actions { display: flex; justify-content: center; gap: 0.75rem; flex-wrap: wrap; }
+.review-list { display: flex; flex-direction: column; gap: 0.75rem; margin-bottom: 2rem; }
+.review-item {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1.1rem 1.25rem;
+}
+.review-q { font-size: 0.88rem; font-weight: 500; margin-bottom: 0.5rem; }
+.review-yours { font-size: 0.8rem; color: var(--wrong); margin-bottom: 0.2rem; }
+.review-correct { font-size: 0.8rem; color: var(--correct); }
+.divider { border: none; border-top: 1px solid var(--border); margin: 2rem 0; }
+.timer-bar-wrap {
+  height: 3px;
+  background: var(--surface2);
+  border-radius: 999px;
+  overflow: hidden;
+  margin-bottom: 1rem;
+}
+.timer-bar-fill {
+  height: 100%;
+  background: var(--accent2);
+  border-radius: 999px;
+  transition: width 1s linear, background 0.3s;
+}
+.timer-bar-fill.hurry { background: var(--wrong); }
+</style>
+</head>
+<body>
+
+<div id="streak-flash" class="streak-flash"></div>
+
+<div class="wrap">
+  <div class="hdr">
+    <div class="logo">Anatomy<em>Quest</em></div>
+    <div class="hdr-stats">
+      <div class="pill">🔥 <b id="hdr-streak">0</b> streak</div>
+      <div class="pill">⭐ <b id="hdr-score">0</b> pts</div>
+    </div>
+  </div>
+
+  <!-- HOME -->
+  <div id="screen-home" class="screen on">
+    <h1 class="hero-title">Master<br><span class="hi">Anatomy</span><br>one quiz at a time.</h1>
+    <p class="hero-sub">Muscles, nerves, origins, insertions — pick your topics and test yourself with 60+ questions pulled straight from your lecture notes.</p>
+
+    <div class="section-label">Choose topics</div>
+    <div class="chips" id="topic-chips"></div>
+
+    <div class="section-label">Game mode</div>
+    <div class="mode-grid" id="mode-grid">
+      <div class="mode-card on" data-mode="quiz" style="--card-col:#7b6ef6">
+        <div class="mode-icon">🧠</div>
+        <div class="mode-name">Quiz</div>
+        <div class="mode-desc">Multiple choice — 4 options, pick the right answer. Streak bonuses apply.</div>
+      </div>
+      <div class="mode-card" data-mode="timed" style="--card-col:#f0c840">
+        <div class="mode-icon">⚡</div>
+        <div class="mode-name">Speed Round</div>
+        <div class="mode-desc">10 seconds per question. Clock is ticking. Faster = more points.</div>
+      </div>
+      <div class="mode-card" data-mode="survival" style="--card-col:#f05050">
+        <div class="mode-icon">❤️</div>
+        <div class="mode-name">Survival</div>
+        <div class="mode-desc">3 lives. One wrong answer costs you a life. Don't die.</div>
+      </div>
+    </div>
+
+    <div class="section-label">Number of questions</div>
+    <div class="chips" id="count-chips">
+      <div class="chip on" data-val="10">10</div>
+      <div class="chip" data-val="20">20</div>
+      <div class="chip" data-val="30">30</div>
+      <div class="chip" data-val="50">All 60+</div>
+    </div>
+
+    <button class="btn btn-primary" id="btn-start" onclick="startGame()">Start Game →</button>
+  </div>
+
+  <!-- QUIZ -->
+  <div id="screen-quiz" class="screen">
+    <div class="progress-bar-wrap">
+      <div class="progress-bar-fill" id="progress-fill" style="width:0%"></div>
+    </div>
+    <div class="quiz-meta">
+      <span class="quiz-topic" id="q-topic-label">—</span>
+      <div style="display:flex;gap:1rem;align-items:center">
+        <span id="lives-display" style="font-size:1rem;letter-spacing:0.05em"></span>
+        <span class="quiz-count" id="q-count-label">1 / 10</span>
+      </div>
+    </div>
+    <div class="timer-bar-wrap" id="timer-wrap" style="display:none">
+      <div class="timer-bar-fill" id="timer-fill" style="width:100%"></div>
+    </div>
+    <div class="q-card">
+      <div class="q-type-badge" id="q-type-badge">Origin / Insertion</div>
+      <div class="q-text" id="q-text">Loading...</div>
+    </div>
+    <div class="answers" id="answers-grid"></div>
+    <div class="feedback-box" id="feedback-box">
+      <div class="feedback-head" id="feedback-head"></div>
+      <div class="feedback-body" id="feedback-body"></div>
+    </div>
+    <div class="quiz-actions">
+      <button class="btn btn-ghost" onclick="quitGame()">Quit</button>
+      <button class="btn btn-primary" id="btn-next" onclick="nextQuestion()" style="display:none">Next →</button>
+    </div>
+  </div>
+
+  <!-- RESULTS -->
+  <div id="screen-results" class="screen">
+    <div class="results-hero">
+      <div class="results-score" id="res-score">0%</div>
+      <div class="results-label" id="res-label">—</div>
+    </div>
+    <div class="results-grid">
+      <div class="stat-card"><div class="sv" id="res-correct" style="color:var(--correct)">0</div><div class="sl">Correct</div></div>
+      <div class="stat-card"><div class="sv" id="res-wrong" style="color:var(--wrong)">0</div><div class="sl">Wrong</div></div>
+      <div class="stat-card"><div class="sv" id="res-streak" style="color:var(--gold)">0</div><div class="sl">Best Streak</div></div>
+      <div class="stat-card"><div class="sv" id="res-pts">0</div><div class="sl">Points</div></div>
+      <div class="stat-card"><div class="sv" id="res-time">—</div><div class="sl">Avg Speed</div></div>
+      <div class="stat-card"><div class="sv" id="res-acc">—</div><div class="sl">Accuracy</div></div>
+    </div>
+    <div id="review-section" style="display:none">
+      <hr class="divider">
+      <div class="section-label" style="margin-bottom:1rem">Review wrong answers</div>
+      <div class="review-list" id="review-list"></div>
+    </div>
+    <div class="results-actions">
+      <button class="btn btn-ghost" onclick="showScreen('home')">Menu</button>
+      <button class="btn btn-primary" onclick="startGame()">Play Again →</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const QUESTIONS = [
+  // GLUTEAL REGION
+  { topic:"Gluteal Region", type:"Origin", q:"Where does <strong>Gluteus Maximus</strong> originate?", a:"Posterior surface of the ilium, sacrum & coccyx", wrong:["Iliac fossa of the pelvis","Anterior surface of the sacrum","Ischial tuberosity"], fact:"Gluteus Maximus is the largest and most superficial gluteal muscle." },
+  { topic:"Gluteal Region", type:"Insertion", q:"Where do the <strong>superior fibres</strong> of Gluteus Maximus insert?", a:"Iliotibial tract", wrong:["Gluteal tuberosity of femur","Greater trochanter","Lesser trochanter"], fact:"The inferior fibres insert into the gluteal tuberosity of the femur." },
+  { topic:"Gluteal Region", type:"Nerve", q:"Which nerve innervates <strong>Gluteus Maximus</strong>?", a:"Inferior gluteal nerve (L5, S1, S2)", wrong:["Superior gluteal nerve (L4, L5, S1)","Obturator nerve (L2-L4)","Sciatic nerve (L4-S3)"], fact:"The superior gluteal nerve innervates Gluteus Medius, Minimus and TFL." },
+  { topic:"Gluteal Region", type:"Action", q:"What is the primary action of <strong>Gluteus Medius & Minimus</strong>?", a:"Abduction and medial rotation of the hip", wrong:["Extension and lateral rotation","Adduction of the thigh","Flexion at the hip joint"], fact:"Gluteus Maximus is the main extensor and assists lateral rotation." },
+  { topic:"Gluteal Region", type:"Insertion", q:"Where does <strong>Gluteus Medius</strong> insert?", a:"Lateral surface of the greater trochanter", wrong:["Anterior aspect of the greater trochanter","Iliotibial tract","Quadrate tubercle on intertrochanteric crest"], fact:"Gluteus Minimus inserts on the anterior aspect of the greater trochanter." },
+  { topic:"Gluteal Region", type:"Fact", q:"<strong>Piriformis</strong> is a key landmark because the sciatic nerve emerges:", a:"Inferior to piriformis", wrong:["Superior to piriformis","Medial to piriformis","Through the piriformis muscle"], fact:"Piriformis is the most superior of the deep gluteal muscles, originating from the anterior surface of the sacrum." },
+  { topic:"Gluteal Region", type:"Origin", q:"Where does <strong>Quadratus Femoris</strong> originate?", a:"Ischial tuberosity", wrong:["Ischial spine","Obturator membrane","Anterior surface of sacrum"], fact:"Quadratus Femoris is the most inferior deep gluteal muscle." },
+  { topic:"Gluteal Region", type:"Insertion", q:"Where does <strong>Quadratus Femoris</strong> insert — unlike the other deep gluteal muscles?", a:"Quadrate tubercle on the intertrochanteric crest", wrong:["Posterosuperior aspect of the greater trochanter","Iliotibial tract","Medial lip of the intertubercular groove"], fact:"All other deep gluteal muscles insert on the posterosuperior aspect of the greater trochanter." },
+  { topic:"Gluteal Region", type:"Origin", q:"Where does <strong>Tensor Fascia Lata</strong> originate?", a:"ASIS (Anterior Superior Iliac Spine)", wrong:["AIIS (Anterior Inferior Iliac Spine)","Iliac crest","Posterior surface of ilium"], fact:"TFL inserts into the anterior aspect of the iliotibial tract and is innervated by the superior gluteal nerve." },
+  { topic:"Gluteal Region", type:"Nerve", q:"Which nerve innervates <strong>Obturator Externus</strong>?", a:"Obturator nerve (L2-L4)", wrong:["Nerve to quadratus femoris","Superior gluteal nerve","Inferior gluteal nerve"], fact:"Obturator Externus is sometimes classed as a deep gluteal muscle and also adducts the thigh." },
+  // ANTERIOR THIGH
+  { topic:"Thigh — Anterior", type:"Nerve", q:"Which nerve innervates all <strong>Quadriceps</strong> muscles?", a:"Femoral nerve (L2-L4)", wrong:["Obturator nerve (L2-L4)","Sciatic nerve (L4-S3)","Musculocutaneous nerve (C5-C7)"], fact:"Pectineus also receives a branch from the obturator nerve." },
+  { topic:"Thigh — Anterior", type:"Insertion", q:"Where do all <strong>Quadriceps</strong> muscles insert?", a:"Base of the patella via the quadriceps tendon", wrong:["Head of fibula","Medial tibial condyle","Pes anserinus on the proximal tibia"], fact:"The tendon continues as the patellar ligament to the tibial tuberosity." },
+  { topic:"Thigh — Anterior", type:"Fact", q:"Which quadriceps muscle is the <strong>only one</strong> that crosses the hip joint?", a:"Rectus Femoris", wrong:["Vastus Medialis","Vastus Lateralis","Vastus Intermedius"], fact:"Rectus Femoris originates from the AIIS and groove above the acetabulum, allowing it to also flex the thigh at the hip." },
+  { topic:"Thigh — Anterior", type:"Origin", q:"Where does <strong>Vastus Medialis</strong> originate?", a:"Intertrochanteric line & medial lip of the linea aspera", wrong:["Greater trochanter & lateral lip of linea aspera","Anterior and lateral surfaces of femoral shaft","AIIS and groove above acetabulum"], fact:"The VMO fibres resist lateral displacement of the patella." },
+  { topic:"Thigh — Anterior", type:"Origin", q:"Where does <strong>Sartorius</strong> originate, and what makes it notable?", a:"ASIS — it is the longest muscle in the body", wrong:["AIIS — it crosses three joints","Ischial tuberosity — it is a hamstring","Iliac crest — it stabilises the pelvis"], fact:"Sartorius inserts into the pes anserinus alongside gracilis and semitendinosus." },
+  { topic:"Thigh — Anterior", type:"Insertion", q:"Where does <strong>Iliopsoas</strong> insert?", a:"Lesser trochanter of the femur", wrong:["Greater trochanter of the femur","Medial tibial condyle","AIIS"], fact:"Iliopsoas comprises psoas major and iliacus. It is the prime flexor of the hip." },
+  { topic:"Thigh — Anterior", type:"Fact", q:"<strong>Pectineus</strong> forms the base of the femoral triangle. What is its action?", a:"Adducts and flexes the thigh at the hip", wrong:["Extends and laterally rotates the thigh","Abducts and medially rotates the hip","Flexes the knee and adducts the thigh"], fact:"Pectineus originates from the pectineal line on the anterior surface of the superior pubic ramus." },
+  // POSTERIOR THIGH
+  { topic:"Thigh — Posterior", type:"Nerve", q:"Which nerve innervates all hamstrings <strong>except</strong> the short head of Biceps Femoris?", a:"Tibial part of the sciatic nerve (L4-S3)", wrong:["Common peroneal nerve","Femoral nerve (L2-L4)","Obturator nerve (L2-L4)"], fact:"The short head of Biceps Femoris is innervated by the common peroneal (fibular) nerve." },
+  { topic:"Thigh — Posterior", type:"Origin", q:"All hamstrings originate from which bony landmark?", a:"Ischial tuberosity", wrong:["Linea aspera of the femur","Inferior ramus of pubis","Lateral condyle of the tibia"], fact:"The exception is the short head of Biceps Femoris which originates from the linea aspera." },
+  { topic:"Thigh — Posterior", type:"Insertion", q:"Where does <strong>Biceps Femoris</strong> insert?", a:"Head of the fibula via a common tendon", wrong:["Upper medial aspect of tibia","Medial tibial condyle","Pes anserinus on the tibia"], fact:"Semitendinosus inserts into the pes anserinus (upper medial tibia)." },
+  { topic:"Thigh — Posterior", type:"Insertion", q:"Where does <strong>Semimembranosus</strong> insert?", a:"Medial tibial condyle", wrong:["Head of fibula","Upper medial tibia (pes anserinus)","Lateral tibial condyle"], fact:"Semimembranosus lies deep to Semitendinosus." },
+  { topic:"Thigh — Posterior", type:"Action", q:"What additional action does <strong>Semitendinosus / Semimembranosus</strong> perform besides flexing the knee?", a:"Extends the thigh at the hip and medially rotates the thigh/leg", wrong:["Laterally rotates the hip and extends the knee","Abducts the thigh at the hip","Adducts the thigh and flexes the hip"], fact:"Biceps Femoris additionally laterally rotates the hip and knee." },
+  // MEDIAL THIGH
+  { topic:"Thigh — Medial", type:"Nerve", q:"Which nerve innervates all medial thigh muscles <strong>except</strong> the hamstring part of Adductor Magnus?", a:"Obturator nerve (L2-L4)", wrong:["Tibial part of sciatic nerve","Femoral nerve (L2-L4)","Superior gluteal nerve"], fact:"The hamstring component of Adductor Magnus is innervated by the tibial part of the sciatic nerve." },
+  { topic:"Thigh — Medial", type:"Fact", q:"The <strong>adductor hiatus</strong> is a gap in Adductor Magnus through which:", a:"Femoral vessels pass", wrong:["The sciatic nerve passes","The obturator nerve passes","The saphenous nerve exits"], fact:"Adductor Magnus has two components — adductor (inferior ramus of pubis) and hamstring (ischial tuberosity)." },
+  { topic:"Thigh — Medial", type:"Origin", q:"Which medial thigh muscle forms the <strong>medial border</strong> of the femoral triangle?", a:"Adductor Longus", wrong:["Adductor Brevis","Gracilis","Pectineus"], fact:"Pectineus forms the base of the femoral triangle; Adductor Longus forms the medial border." },
+  { topic:"Thigh — Medial", type:"Insertion", q:"Where does <strong>Gracilis</strong> insert?", a:"Medial surface of the proximal tibia (pes anserinus)", wrong:["Linea aspera of the femur","Head of fibula","Medial tibial condyle"], fact:"Gracilis is the most superficial and medial muscle of the medial compartment. It also flexes the leg at the knee." },
+  // LEG ANTERIOR
+  { topic:"Leg — Anterior", type:"Nerve", q:"All anterior compartment leg muscles are innervated by:", a:"Deep peroneal (fibular) nerve (L4-L5)", wrong:["Superficial peroneal nerve (L4-S1)","Tibial nerve (L4-S3)","Common peroneal nerve"], fact:"All anterior compartment muscles originate from the medial fibular shaft, except Tibialis Anterior." },
+  { topic:"Leg — Anterior", type:"Insertion", q:"Where does <strong>Tibialis Anterior</strong> insert?", a:"Medial cuneiform and base of 1st metatarsal", wrong:["Plantar surface of the navicular","Base of the 5th metatarsal","Distal phalanx of the great toe"], fact:"Tibialis Anterior originates from the lateral surface of the tibia and also inverts the foot." },
+  { topic:"Leg — Anterior", type:"Action", q:"What is the primary shared action of all <strong>anterior compartment</strong> leg muscles?", a:"Dorsiflexion of the foot", wrong:["Plantarflexion","Eversion","Inversion"], fact:"Tibialis Anterior additionally inverts; Peroneus Tertius additionally everts." },
+  { topic:"Leg — Anterior", type:"Insertion", q:"Where does <strong>Extensor Hallucis Longus</strong> insert?", a:"Distal phalanx of the great toe", wrong:["Middle phalanx of the 2nd-5th toes","Base of the 5th metatarsal","Proximal phalanx of the great toe"], fact:"Extensor Hallucis Longus also extends the great toe." },
+  // LEG LATERAL
+  { topic:"Leg — Lateral", type:"Nerve", q:"Both lateral compartment muscles are innervated by:", a:"Superficial peroneal (fibular) nerve (L4-S1)", wrong:["Deep peroneal nerve (L4-L5)","Tibial nerve (L4-S3)","Sural nerve"], fact:"The lateral compartment's primary action is eversion of the foot." },
+  { topic:"Leg — Lateral", type:"Insertion", q:"Where does <strong>Peroneus Longus</strong> insert?", a:"Plantar surface of the medial cuneiform and base of 1st metatarsal", wrong:["Tubercle on the base of the 5th metatarsal","Dorsal surface of the intermediate cuneiform","Base of the 2nd metatarsal"], fact:"Peroneus Brevis inserts on the tubercle at the base of the 5th metatarsal." },
+  { topic:"Leg — Lateral", type:"Origin", q:"Where does <strong>Peroneus Brevis</strong> originate?", a:"Inferolateral surface of the fibular shaft", wrong:["Upper lateral surface of the fibula","Anterior surface of the fibula","Interosseous membrane"], fact:"Peroneus Longus originates from the upper lateral fibula surface and lateral tibial condyle." },
+  // LEG POSTERIOR SUPERFICIAL
+  { topic:"Leg — Posterior", type:"Insertion", q:"Where do all three <strong>superficial posterior</strong> leg muscles insert?", a:"Calcaneal tuberosity via the calcaneal (Achilles) tendon", wrong:["Base of the 5th metatarsal","Navicular and medial cuneiform","Plantar surface of distal phalanx of great toe"], fact:"Gastrocnemius, Plantaris and Soleus all form the calcaneal tendon." },
+  { topic:"Leg — Posterior", type:"Origin", q:"Where does <strong>Gastrocnemius</strong> originate?", a:"Lateral femoral condyle (lateral head) and medial femoral condyle (medial head)", wrong:["Soleal line of the tibia","Posterior surface of the fibula","Lateral supracondylar line of the femur"], fact:"Because it crosses the knee, Gastrocnemius also assists in knee flexion." },
+  { topic:"Leg — Posterior", type:"Origin", q:"Where does <strong>Soleus</strong> originate?", a:"Soleal line of the tibia", wrong:["Medial femoral condyle","Posterior surface of the fibula","Interosseous membrane"], fact:"Soleus doesn't cross the knee joint, unlike Gastrocnemius." },
+  { topic:"Leg — Posterior", type:"Action", q:"What is the action of <strong>Popliteus</strong>?", a:"Rotates the femur on the tibia, 'unlocking' the knee so flexion can occur", wrong:["Plantarflexes the foot","Flexes the lateral 4 toes","Inverts and plantarflexes the foot"], fact:"Popliteus originates from the lateral condyle of the femur and horn of the lateral meniscus." },
+  { topic:"Leg — Posterior", type:"Action", q:"What is the primary action of <strong>Tibialis Posterior</strong>?", a:"Plantarflexes and inverts the foot; maintains medial arch", wrong:["Dorsiflexion and eversion","Flexion of the great toe","Extends the lateral 4 toes"], fact:"Tibialis Posterior's tendon passes posterior to the medial malleolus." },
+  { topic:"Leg — Posterior", type:"Insertion", q:"Where does <strong>Flexor Digitorum Longus</strong> insert?", a:"Base of the distal phalanx of each of the lateral 4 digits", wrong:["Plantar surface of base of distal phalanx of great toe","Middle phalanges of 2nd-5th toes","Extensor hood of the fingers"], fact:"FDL originates from the medial surface of the tibia." },
+  // PECTORAL
+  { topic:"Pectoral Region", type:"Nerve", q:"Which two nerves innervate <strong>Pectoralis Major</strong>?", a:"Medial pectoral nerve (C8-T1) and lateral pectoral nerve (C5-7)", wrong:["Thoracodorsal nerve and long thoracic nerve","Axillary nerve (C5,6) and radial nerve","Suprascapular nerve and dorsal scapular nerve"], fact:"Pectoralis Major is the most superficial pectoral muscle, with sternal and clavicular heads." },
+  { topic:"Pectoral Region", type:"Insertion", q:"Where does <strong>Pectoralis Minor</strong> insert?", a:"Coracoid process of the scapula", wrong:["Intertubercular sulcus of the humerus","Acromion of the scapula","Medial border of the scapula"], fact:"Pectoralis Minor originates from the 3rd-5th ribs and stabilises the scapula." },
+  { topic:"Pectoral Region", type:"Action", q:"What is the primary action of <strong>Serratus Anterior</strong>?", a:"Protracts the scapula and holds it against the ribcage", wrong:["Elevates the scapula","Retracts the scapula","Depresses the clavicle"], fact:"Serratus Anterior also rotates the scapula to allow arm abduction above 90°. Damage causes winging of the scapula." },
+  { topic:"Pectoral Region", type:"Nerve", q:"Which nerve innervates <strong>Serratus Anterior</strong>?", a:"Long thoracic nerve (C5-7)", wrong:["Dorsal scapular nerve","Thoracodorsal nerve","Medial pectoral nerve"], fact:"Serratus Anterior forms the medial wall of the axilla." },
+  { topic:"Pectoral Region", type:"Action", q:"What does <strong>Subclavius</strong> do?", a:"Anchors and depresses the clavicle", wrong:["Protracts the scapula","Medially rotates the arm","Elevates the clavicle"], fact:"Subclavius runs horizontally directly underneath the clavicle." },
+  // SHOULDER
+  { topic:"Shoulder", type:"Nerve", q:"Which nerve innervates <strong>Deltoid</strong>?", a:"Axillary nerve (C5,6)", wrong:["Radial nerve (C5-T1)","Musculocutaneous nerve (C5-C7)","Suprascapular nerve"], fact:"The axillary nerve arises from the posterior cord of the brachial plexus." },
+  { topic:"Shoulder", type:"Action", q:"Which fibres of Deltoid <strong>abduct</strong> the arm from 15-90°?", a:"Middle fibres", wrong:["Anterior fibres","Posterior fibres","All fibres equally"], fact:"The supraspinatus initiates abduction from 0-15°, then the deltoid takes over." },
+  { topic:"Shoulder", type:"Nerve", q:"Which nerve innervates <strong>Trapezius</strong>?", a:"Spinal accessory nerve (CN XI)", wrong:["Dorsal scapular nerve","Long thoracic nerve","Thoracodorsal nerve"], fact:"Trapezius also receives proprioceptor fibres from C3/C4. It is the most superficial back muscle." },
+  { topic:"Shoulder", type:"Nerve", q:"Which nerve innervates <strong>Latissimus Dorsi</strong>?", a:"Thoracodorsal nerve", wrong:["Dorsal scapular nerve","Axillary nerve (C5,6)","Medial pectoral nerve"], fact:"Latissimus Dorsi extends, adducts and medially rotates the upper limb." },
+  { topic:"Shoulder", type:"Fact", q:"Which rotator cuff muscle <strong>medially rotates</strong> the arm?", a:"Subscapularis", wrong:["Supraspinatus","Infraspinatus","Teres Minor"], fact:"SITS = Supraspinatus, Infraspinatus, Teres Minor, Subscapularis. Only Subscapularis medially rotates." },
+  { topic:"Shoulder", type:"Action", q:"What is the action of <strong>Supraspinatus</strong>?", a:"Abducts the arm from 0-15° and assists deltoid from 15-90°", wrong:["Laterally rotates the arm","Medially rotates the arm","Adducts the arm at the shoulder"], fact:"Supraspinatus originates from the supraspinous fossa and inserts on the greater tubercle of the humerus." },
+  { topic:"Shoulder", type:"Nerve", q:"Which nerve innervates <strong>Supraspinatus and Infraspinatus</strong>?", a:"Suprascapular nerve", wrong:["Axillary nerve","Upper subscapular nerve","Dorsal scapular nerve"], fact:"Subscapularis: upper and lower subscapular nerves. Teres Minor: axillary nerve." },
+  { topic:"Shoulder", type:"Origin", q:"Where does <strong>Teres Major</strong> originate?", a:"Posterior surface of the inferior angle of the scapula", wrong:["Posterior surface of the scapula body","Infraspinous fossa of the scapula","Subscapular fossa of the scapula"], fact:"Teres Major forms the inferior border of the quadrangular space." },
+  // ARM
+  { topic:"Arm", type:"Nerve", q:"All anterior arm muscles (BBC) are innervated by:", a:"Musculocutaneous nerve (C5-C7)", wrong:["Radial nerve (C5-T1)","Median nerve (C6-T1)","Ulnar nerve (C8-T1)"], fact:"BBC = Biceps Brachii, Brachialis, Coracobrachialis." },
+  { topic:"Arm", type:"Insertion", q:"Where does <strong>Biceps Brachii</strong> insert?", a:"Radial tuberosity and forearm fascia via bicipital aponeurosis", wrong:["Coronoid process of the ulna","Olecranon of the ulna","Medial side of the humeral shaft"], fact:"Biceps Brachii has no attachment to the humerus itself." },
+  { topic:"Arm", type:"Action", q:"What is the primary action of <strong>Biceps Brachii</strong>?", a:"Supination of the forearm", wrong:["Extension of the forearm","Pronation of the forearm","Medial rotation of the shoulder"], fact:"The biceps tendon reflex tests spinal cord segment C6." },
+  { topic:"Arm", type:"Fact", q:"Which arm muscle forms the <strong>floor of the cubital fossa</strong>?", a:"Brachialis", wrong:["Biceps Brachii","Coracobrachialis","Brachioradialis"], fact:"Brachialis inserts into the coronoid process and ulnar tuberosity." },
+  { topic:"Arm", type:"Nerve", q:"Which nerve innervates <strong>Triceps Brachii</strong>, and which spinal segment does its reflex test?", a:"Radial nerve (C5-T1); C7 reflex", wrong:["Musculocutaneous nerve; C6 reflex","Axillary nerve; C5 reflex","Median nerve; C8 reflex"], fact:"The triceps brachii is the only muscle in the posterior arm compartment." },
+  // FOREARM ANTERIOR
+  { topic:"Forearm — Anterior", type:"Nerve", q:"All superficial anterior forearm muscles are innervated by the median nerve <strong>EXCEPT</strong>:", a:"Flexor Carpi Ulnaris (innervated by ulnar nerve C8-T1)", wrong:["Pronator Teres","Palmaris Longus","Flexor Carpi Radialis"], fact:"FCU receives innervation from the ulnar nerve (C8-T1)." },
+  { topic:"Forearm — Anterior", type:"Fact", q:"Superficial anterior forearm muscles run medial to lateral in which order?", a:"Pronator Teres, FCR, Palmaris Longus, FCU (PASS FAIL PASS FAIL)", wrong:["FCU, Palmaris Longus, FCR, Pronator Teres","FCR, Pronator Teres, FCU, Palmaris Longus","Palmaris Longus, FCU, Pronator Teres, FCR"], fact:"The common flexor origin for all superficial anterior muscles is the medial epicondyle." },
+  { topic:"Forearm — Anterior", type:"Action", q:"What is the action of <strong>Flexor Carpi Radialis</strong>?", a:"Abducts the wrist", wrong:["Adducts the wrist","Pronates the forearm","Flexes the elbow"], fact:"Flexor Carpi Ulnaris adducts the wrist; FCR abducts." },
+  { topic:"Forearm — Anterior", type:"Nerve", q:"Which half of <strong>Flexor Digitorum Profundus</strong> is innervated by the ulnar nerve?", a:"Medial (ulnar) half — flexes the little and ring fingers", wrong:["Lateral (radial) half — flexes middle and index fingers","The entire muscle is innervated by the ulnar nerve","The entire muscle is innervated by the anterior interosseous branch"], fact:"The radial half of FDP is innervated by the anterior interosseous branch of the median nerve." },
+  { topic:"Forearm — Anterior", type:"Fact", q:"<strong>Flexor Digitorum Superficialis</strong> is a key landmark because:", a:"The median nerve and ulnar artery pass between its two heads", wrong:["The radial nerve passes deep to it","It is the only forearm muscle not originating from the medial epicondyle","It forms the floor of the carpal tunnel"], fact:"FDS flexes the MCP and proximal IP joints of the four fingers." },
+  // FOREARM POSTERIOR
+  { topic:"Forearm — Posterior", type:"Action", q:"<strong>Brachioradialis</strong> looks like an extensor but is actually a:", a:"Flexor of the elbow in the mid-prone (neutral) position", wrong:["Pronator of the forearm","Supinator of the forearm","Extensor of the wrist"], fact:"Brachioradialis originates from the proximal lateral supracondylar ridge and inserts at the distal radius." },
+  { topic:"Forearm — Posterior", type:"Action", q:"What is the action of <strong>Extensor Carpi Ulnaris</strong>?", a:"Extends and adducts the wrist", wrong:["Extends and abducts the wrist","Flexes and adducts the wrist","Supinates and extends the wrist"], fact:"ECRL and ECRB extend and abduct the wrist; ECU extends and adducts." },
+  { topic:"Forearm — Posterior", type:"Fact", q:"The <strong>juncturae tendinum</strong> of Extensor Digitorum means:", a:"Full extension of the middle or ring finger is prevented when adjacent fingers are flexed", wrong:["The tendons of FDP and FDS interdigitate at the finger","The lumbricals arise from these fibrous connections","The extensor hood wraps around to the palmar side"], fact:"Juncturae tendinum are fibrous bands linking the 4 tendons on the dorsum of the hand." },
+  { topic:"Forearm — Posterior", type:"Insertion", q:"Where does <strong>Extensor Pollicis Longus</strong> insert?", a:"Distal phalanx of the thumb", wrong:["Base of the proximal phalanx of the thumb","Radial side of the base of the first metacarpal","Extensor hood of the index finger"], fact:"Extensor Pollicis Brevis inserts on the base of the proximal phalanx of the thumb." },
+  // HAND
+  { topic:"Hand", type:"Nerve", q:"The mnemonic LOAF identifies <strong>median nerve</strong> exceptions in the hand. What does LOAF stand for?", a:"Lumbricals (1st & 2nd), Opponens Pollicis, Abductor Pollicis Brevis, Flexor Pollicis Brevis (superficial head)", wrong:["Lumbricals (all 4), Opponens, APB, FPB","Lumbricals (3rd & 4th), ODM, ADM, FDM","Lumbricals (2nd & 3rd), OP, APL, FPL"], fact:"MEat LOAF: Median nerve innervates these. The whole hand is otherwise ulnar nerve." },
+  { topic:"Hand", type:"Action", q:"What is the action of <strong>Opponens Pollicis</strong>?", a:"Opposes the thumb — allows contact between tip of thumb and other digits", wrong:["Abducts the thumb","Adducts the thumb","Flexes the MCP joint of the thumb"], fact:"Opponens Pollicis inserts on the lateral edge of the 1st metacarpal." },
+  { topic:"Hand", type:"Action", q:"What is the mnemonic for dorsal vs palmar interossei actions?", a:"DAB PAD: Dorsal ABducts, Palmar ADducts", wrong:["LOAF: Lumbricals, Opponens, APB, FPB","SITS: Supraspinatus, Infraspinatus, Teres Minor, Subscapularis","PASS FAIL: order of anterior forearm muscles"], fact:"There are 4 dorsal interossei and 3 palmar interossei — all innervated by the ulnar nerve." },
+  { topic:"Hand", type:"Action", q:"What is the action of the <strong>Lumbricals</strong>?", a:"Flex at the MCP joints and extend at the IP joints of each finger", wrong:["Abduct the fingers","Adduct the fingers","Extend at the MCP joints and flex at the IP joints"], fact:"Lumbricals originate from tendons of FDP and insert onto the extensor hood." },
+  { topic:"Hand", type:"Nerve", q:"Which lumbricals are innervated by the <strong>median nerve</strong>?", a:"1st and 2nd (lateral lumbricals)", wrong:["3rd and 4th (medial lumbricals)","All 4 lumbricals","None — all are ulnar nerve"], fact:"This is the anatomical basis for distinguishing ulnar claw from hand of benediction patterns." },
+  { topic:"Hand", type:"Origin", q:"Where does <strong>Adductor Pollicis</strong> originate?", a:"Transverse head: 3rd metacarpal; Oblique head: capitate and 2nd/3rd metacarpal", wrong:["Scaphoid and flexor retinaculum","Hook of hamate and flexor retinaculum","Pisiform and tendon of FCU"], fact:"Adductor Pollicis inserts onto the proximal phalanx of the thumb along with FPB." },
+  { topic:"Hand", type:"Action", q:"What is the action of <strong>Abductor Digiti Minimi</strong>?", a:"Abducts the little finger (5th digit)", wrong:["Flexes the MCP joint of the 5th digit","Rotates the little finger towards the palm","Adducts the little finger"], fact:"ADM is the most medial hypothenar muscle, originating from the pisiform and tendon of FCU." },
+  { topic:"Hand", type:"Origin", q:"Most hypothenar muscles originate from hook of hamate & flexor retinaculum. Which is the exception?", a:"Abductor Digiti Minimi — originates from the pisiform and tendon of FCU", wrong:["Opponens Digiti Minimi","Flexor Digiti Minimi Brevis","Palmaris Brevis"], fact:"All hypothenar muscles except ODM insert onto the base of the proximal phalanx of the 5th digit." },
+];
+
+const ALL_TOPICS = [...new Set(QUESTIONS.map(q => q.topic))];
+let state = {
+  selectedTopics: [...ALL_TOPICS],
+  mode: 'quiz',
+  questionCount: 10,
+  queue: [], qIndex: 0,
+  score: 0, streak: 0, bestStreak: 0,
+  lives: 3, correct: 0, wrong: 0,
+  wrongAnswers: [], answered: false,
+  timerInterval: null, timerCurrent: 10,
+  questionStartTime: 0, totalTime: 0,
+  sessionScore: 0,
+};
+
+function init() {
+  const container = document.getElementById('topic-chips');
+  const allChip = document.createElement('div');
+  allChip.className = 'chip on';
+  allChip.textContent = 'All Topics';
+  allChip.onclick = toggleAllTopics;
+  container.appendChild(allChip);
+  ALL_TOPICS.forEach(t => {
+    const c = document.createElement('div');
+    c.className = 'chip on';
+    c.dataset.topic = t;
+    c.textContent = t;
+    c.onclick = () => toggleTopic(t, c);
+    container.appendChild(c);
+  });
+  document.querySelectorAll('.mode-card').forEach(c => {
+    c.onclick = () => {
+      document.querySelectorAll('.mode-card').forEach(x => x.classList.remove('on'));
+      c.classList.add('on');
+      state.mode = c.dataset.mode;
+    };
+  });
+  document.querySelectorAll('#count-chips .chip').forEach(c => {
+    c.onclick = () => {
+      document.querySelectorAll('#count-chips .chip').forEach(x => x.classList.remove('on'));
+      c.classList.add('on');
+      state.questionCount = parseInt(c.dataset.val) || 999;
+    };
+  });
+}
+
+function toggleAllTopics() {
+  const chips = document.querySelectorAll('[data-topic]');
+  const allOn = state.selectedTopics.length === ALL_TOPICS.length;
+  if (allOn) {
+    state.selectedTopics = [];
+    chips.forEach(c => c.classList.remove('on'));
+    document.querySelector('#topic-chips .chip').classList.remove('on');
+  } else {
+    state.selectedTopics = [...ALL_TOPICS];
+    chips.forEach(c => c.classList.add('on'));
+    document.querySelector('#topic-chips .chip').classList.add('on');
+  }
+}
+
+function toggleTopic(topic, chip) {
+  if (state.selectedTopics.includes(topic)) {
+    if (state.selectedTopics.length === 1) return;
+    state.selectedTopics = state.selectedTopics.filter(t => t !== topic);
+    chip.classList.remove('on');
+    document.querySelector('#topic-chips .chip').classList.remove('on');
+  } else {
+    state.selectedTopics.push(topic);
+    chip.classList.add('on');
+    if (state.selectedTopics.length === ALL_TOPICS.length)
+      document.querySelector('#topic-chips .chip').classList.add('on');
+  }
+}
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('on'));
+  document.getElementById('screen-' + id).classList.add('on');
+}
+
+function startGame() {
+  state.score = 0; state.streak = 0; state.bestStreak = 0;
+  state.correct = 0; state.wrong = 0; state.lives = 3;
+  state.wrongAnswers = []; state.sessionScore = 0; state.totalTime = 0;
+  updateHdrStats();
+  let pool = QUESTIONS.filter(q => state.selectedTopics.includes(q.topic));
+  if (!pool.length) pool = QUESTIONS;
+  pool = shuffle(pool);
+  state.queue = pool.slice(0, Math.min(state.questionCount, pool.length));
+  state.qIndex = 0;
+  showScreen('quiz');
+  renderQuestion();
+}
+
+function renderQuestion() {
+  if (state.qIndex >= state.queue.length) { endGame(); return; }
+  const q = state.queue[state.qIndex];
+  state.answered = false;
+  state.questionStartTime = Date.now();
+  document.getElementById('progress-fill').style.width = (state.qIndex / state.queue.length * 100) + '%';
+  document.getElementById('q-topic-label').textContent = q.topic;
+  document.getElementById('q-count-label').textContent = (state.qIndex + 1) + ' / ' + state.queue.length;
+  document.getElementById('q-type-badge').textContent = q.type;
+  document.getElementById('q-text').innerHTML = q.q;
+  const livesEl = document.getElementById('lives-display');
+  livesEl.textContent = state.mode === 'survival' ? '❤️'.repeat(state.lives) + '🖤'.repeat(3 - state.lives) : '';
+  const fb = document.getElementById('feedback-box');
+  fb.className = 'feedback-box';
+  document.getElementById('btn-next').style.display = 'none';
+  const opts = shuffle([q.a, ...q.wrong]);
+  const grid = document.getElementById('answers-grid');
+  grid.innerHTML = '';
+  ['A','B','C','D'].forEach((key, i) => {
+    if (!opts[i]) return;
+    const btn = document.createElement('button');
+    btn.className = 'ans-btn';
+    btn.innerHTML = '<span class="ans-key">' + key + '</span> ' + opts[i];
+    btn.onclick = () => checkAnswer(opts[i], q, btn);
+    grid.appendChild(btn);
+  });
+  clearInterval(state.timerInterval);
+  const timerWrap = document.getElementById('timer-wrap');
+  const timerFill = document.getElementById('timer-fill');
+  if (state.mode === 'timed') {
+    timerWrap.style.display = 'block';
+    state.timerCurrent = 10;
+    timerFill.style.width = '100%';
+    timerFill.classList.remove('hurry');
+    state.timerInterval = setInterval(() => {
+      state.timerCurrent--;
+      timerFill.style.width = (state.timerCurrent / 10 * 100) + '%';
+      if (state.timerCurrent <= 3) timerFill.classList.add('hurry');
+      if (state.timerCurrent <= 0) { clearInterval(state.timerInterval); timeOut(q); }
+    }, 1000);
+  } else { timerWrap.style.display = 'none'; }
+}
+
+function checkAnswer(chosen, q, btn) {
+  if (state.answered) return;
+  state.answered = true;
+  clearInterval(state.timerInterval);
+  state.totalTime += (Date.now() - state.questionStartTime) / 1000;
+  document.querySelectorAll('.ans-btn').forEach(b => b.disabled = true);
+  const isCorrect = chosen === q.a;
+  const fb = document.getElementById('feedback-box');
+  if (isCorrect) {
+    btn.classList.add('correct');
+    state.correct++;
+    state.streak++;
+    if (state.streak > state.bestStreak) state.bestStreak = state.streak;
+    const speedBonus = state.mode === 'timed' ? Math.round((state.timerCurrent / 10) * 50) : 0;
+    const streakBonus = Math.min(state.streak - 1, 5) * 20;
+    state.sessionScore += 100 + streakBonus + speedBonus;
+    updateHdrStats();
+    fb.className = 'feedback-box ok show';
+    let head = '✓ Correct!';
+    if (state.streak >= 5) head = '🔥 On fire! ' + state.streak + ' in a row!';
+    else if (state.streak >= 3) head = '⚡ ' + state.streak + '-streak! +' + streakBonus + ' bonus';
+    document.getElementById('feedback-head').textContent = head;
+    document.getElementById('feedback-body').textContent = q.fact;
+    if (state.streak === 3 || state.streak === 5 || state.streak === 10) flashStreak(state.streak);
+  } else {
+    btn.classList.add('wrong');
+    document.querySelectorAll('.ans-btn').forEach(b => {
+      if (b.innerHTML.indexOf(q.a) !== -1 && !b.classList.contains('wrong')) b.classList.add('correct');
+    });
+    state.wrong++;
+    state.streak = 0;
+    state.wrongAnswers.push({ q: q.q, yours: chosen, correct: q.a });
+    updateHdrStats();
+    if (state.mode === 'survival') {
+      state.lives--;
+      document.getElementById('lives-display').textContent = '❤️'.repeat(state.lives) + '🖤'.repeat(3 - state.lives);
+      if (state.lives <= 0) {
+        fb.className = 'feedback-box bad show';
+        document.getElementById('feedback-head').textContent = '💀 Game over! No lives left.';
+        document.getElementById('feedback-body').textContent = 'Correct answer: ' + q.a;
+        const nb = document.getElementById('btn-next');
+        nb.style.display = 'inline-flex';
+        nb.textContent = 'See Results';
+        nb.onclick = endGame;
+        return;
+      }
+    }
+    fb.className = 'feedback-box bad show';
+    document.getElementById('feedback-head').textContent = '✗ Not quite';
+    document.getElementById('feedback-body').textContent = 'Correct: ' + q.a + '. ' + q.fact;
+  }
+  const nb = document.getElementById('btn-next');
+  nb.style.display = 'inline-flex';
+  nb.textContent = state.qIndex + 1 >= state.queue.length ? 'See Results →' : 'Next →';
+  nb.onclick = nextQuestion;
+}
+
+function timeOut(q) {
+  if (state.answered) return;
+  state.answered = true;
+  document.querySelectorAll('.ans-btn').forEach(b => {
+    b.disabled = true;
+    if (b.innerHTML.indexOf(q.a) !== -1) b.classList.add('correct');
+  });
+  state.wrong++; state.streak = 0;
+  state.wrongAnswers.push({ q: q.q, yours: '(time up)', correct: q.a });
+  const fb = document.getElementById('feedback-box');
+  fb.className = 'feedback-box bad show';
+  document.getElementById('feedback-head').textContent = '⏱ Time\'s up!';
+  document.getElementById('feedback-body').textContent = 'Correct answer: ' + q.a;
+  const nb = document.getElementById('btn-next');
+  nb.style.display = 'inline-flex';
+  nb.onclick = nextQuestion;
+  updateHdrStats();
+}
+
+function nextQuestion() {
+  state.qIndex++;
+  document.getElementById('btn-next').onclick = nextQuestion;
+  renderQuestion();
+}
+
+function quitGame() {
+  clearInterval(state.timerInterval);
+  showScreen('home');
+}
+
+function endGame() {
+  clearInterval(state.timerInterval);
+  const total = state.correct + state.wrong;
+  const pct = total > 0 ? Math.round(state.correct / total * 100) : 0;
+  document.getElementById('progress-fill').style.width = '100%';
+  let col = 'var(--wrong)';
+  if (pct >= 80) col = 'var(--correct)';
+  else if (pct >= 60) col = 'var(--gold)';
+  document.getElementById('res-score').textContent = pct + '%';
+  document.getElementById('res-score').style.color = col;
+  const labels = ['Keep at it — revision time! 📚', '', '', '', '', 'Good effort — nearly there!', '','','👍 Solid work!','','🔥 Excellent!','','','','','🌟 Outstanding!','','','','','🏆 Perfect! Anatomy legend.'];
+  let lbl = 'Keep practising!';
+  if (pct === 100) lbl = '🏆 Perfect score! Anatomy legend.';
+  else if (pct >= 90) lbl = '🌟 Outstanding — almost flawless!';
+  else if (pct >= 80) lbl = '🔥 Excellent work!';
+  else if (pct >= 60) lbl = '👍 Solid — a bit more revision needed.';
+  else lbl = '📚 Keep at it — you\'ve got this!';
+  document.getElementById('res-label').textContent = lbl;
+  document.getElementById('res-correct').textContent = state.correct;
+  document.getElementById('res-wrong').textContent = state.wrong;
+  document.getElementById('res-streak').textContent = state.bestStreak;
+  document.getElementById('res-pts').textContent = state.sessionScore;
+  document.getElementById('res-time').textContent = total > 0 ? (state.totalTime / total).toFixed(1) + 's' : '—';
+  document.getElementById('res-acc').textContent = pct + '%';
+  const rev = document.getElementById('review-section');
+  if (state.wrongAnswers.length > 0) {
+    rev.style.display = 'block';
+    const list = document.getElementById('review-list');
+    list.innerHTML = '';
+    state.wrongAnswers.forEach(w => {
+      const d = document.createElement('div');
+      d.className = 'review-item';
+      d.innerHTML = '<div class="review-q">' + w.q + '</div><div class="review-yours">Your answer: ' + w.yours + '</div><div class="review-correct">Correct: ' + w.correct + '</div>';
+      list.appendChild(d);
+    });
+  } else { rev.style.display = 'none'; }
+  showScreen('results');
+}
+
+function flashStreak(n) {
+  const el = document.getElementById('streak-flash');
+  el.textContent = n + '🔥';
+  el.classList.remove('pop');
+  void el.offsetWidth;
+  el.classList.add('pop');
+}
+
+function updateHdrStats() {
+  document.getElementById('hdr-streak').textContent = state.streak;
+  document.getElementById('hdr-score').textContent = state.sessionScore;
+}
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+init();
+</script>
+</body>
+</html>
